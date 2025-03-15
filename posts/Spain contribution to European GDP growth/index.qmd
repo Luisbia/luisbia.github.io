@@ -149,6 +149,6 @@ cont_es_24q4_ea <- round(contrib_q |> filter(geo == "ES") |> select(contrib) |> 
 
 For the EU the contribution was `r cont_es_24q4_eu` and for the Euro area `r cont_es_24q4_ea`.
 
-It seems after all the statement was **not correct**, although my guess is that probably that the politician was adding Portugal and referring to the Euro area. I leave it as an exercise to calculate the contribution of Spain and Portugal.
+It seems after all the statement was **not correct**, although my guess is that probably the politician was adding Portugal and referring to the Euro area. I leave it as an exercise to calculate the contribution of Spain and Portugal.
 
 
