@@ -1,0 +1,77 @@
+---
+title: "Spain contribution to European GDP growth"
+date: "2025-03-15"
+categories: [GDP, Eurostat]
+execute:
+  warning: false
+  message: false
+---
+
+A journalist recently asked us if an statement from a politician was true. The statement was that Spain represented half of the European growth. In this (first) post we would learn how to do it using Eurostat data.
+
+## Annual data
+
+First, I will show the more direct way to do it for annual data. If we want to calculate it for 2024 we need to get the data for Spain and the EU (or Euro area) for 2023 in current prices and for 2024 in previous year prices (prices of 2023). By difference we can calculate the volume change in both areas.
+
+First we load the libraries.
+
+```{r}
+library(eurostat)
+library(dplyr)
+library(tidyr)
+```
+
+And we prepare a query for the data we need. First, the year 2023 in current prices:
+
+```{r}
+dat_23 <- get_eurostat("nama_10_gdp", 
+                    filters = list(geo = c("ES", "EA20", "EU27_2020"),
+                                   na_item = "B1GQ",
+                                   unit = c("CP_MEUR"),
+                                   time_period = 2023),
+                    time_format = "num") |> 
+  select(geo, time, values)
+```
+
+And after the 2024 in previous year prices
+
+```{r}
+dat_24 <- get_eurostat("nama_10_gdp", 
+                    filters = list(geo = c("ES", "EA20", "EU27_2020"),
+                                   na_item = "B1GQ",
+                                   unit = c("PYP_MEUR"),
+                                   time_period = 2024),
+                    time_format = "num") |> 
+  select(geo, time, values)
+```
+
+We bind them together and calculate the change between 2024 and 2023:
+
+```{r}
+dat <- bind_rows(dat_23, dat_24) |> 
+  pivot_wider(names_from = time,
+              values_from = values) |> 
+  mutate(change = `2024` - `2023`,
+         change_p = round(change / `2023` * 100, 2))  
+
+knitr::kable(dat)
+
+```
+
+Spain grew by `r dat |> filter(geo == "ES") |> select(change_p) |> pull()` in 2024 and the EU  by `r dat |> filter(geo == "EU27_2020") |> select(change_p) |> pull()`. But as we are looking for the contribution, we need to divide the change in Spain with the change in the EU.
+
+```{r}
+cont_es_24_eu <- round(dat |> filter(geo == "ES") |> select(change) |> pull() / 
+                       dat |> filter(geo == "EU27_2020") |> select(change) |> pull()
+                       * 100, 2)
+
+cont_es_24_ea <- round(dat |> filter(geo == "ES") |> select(change) |> pull() / 
+                       dat |> filter(geo == "EA20") |> select(change) |> pull()
+                       * 100, 2)
+```
+
+
+For the EU the contribution was `r cont_es_24_eu` and for the Euro area `r cont_es_24_ea`.
+
+## Quarterly data
+

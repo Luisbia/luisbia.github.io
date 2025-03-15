@@ -2,9 +2,9 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "blog",
+    "title": "Personal blog of Luis Biedma",
     "section": "",
-    "text": "Post With Code\n\n\n\n\n\n\nnews\n\n\ncode\n\n\nanalysis\n\n\n\n\n\n\n\n\n\nMar 15, 2025\n\n\nHarlow Malloc\n\n\n\n\n\n\n\n\n\n\n\n\nWelcome To My Blog\n\n\n\n\n\n\nnews\n\n\n\n\n\n\n\n\n\nMar 12, 2025\n\n\nTristan O’Malley\n\n\n\n\n\n\nNo matching items"
+    "text": "Spain contribution to European GDP growth\n\n\n\n\n\n\nGDP\n\n\nEurostat\n\n\n\n\n\n\n\n\n\nMar 15, 2025\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/post-with-code/index.html",
@@ -26,5 +26,26 @@
     "title": "Welcome To My Blog",
     "section": "",
     "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+  },
+  {
+    "objectID": "posts/Spain contribution to European GDP growth/index.html",
+    "href": "posts/Spain contribution to European GDP growth/index.html",
+    "title": "Spain contribution to European GDP growth",
+    "section": "",
+    "text": "A journalist recently asked us if an statement from a politician was true. The statement was that Spain represented half of the European growth. In this (first) post we would learn how to do it using Eurostat data."
+  },
+  {
+    "objectID": "posts/Spain contribution to European GDP growth/index.html#annual-data",
+    "href": "posts/Spain contribution to European GDP growth/index.html#annual-data",
+    "title": "Spain contribution to European GDP growth",
+    "section": "Annual data",
+    "text": "Annual data\nFirst, I will show the more direct way to do it for annual data. If we want to calculate it for 2024 we need to get the data for Spain and the EU (or Euro area) for 2023 in current prices and for 2024 in previous year prices (prices of 2023). By difference we can calculate the volume change in both areas.\nFirst we load the libraries.\n\nlibrary(eurostat)\nlibrary(dplyr)\nlibrary(tidyr)\n\nAnd we prepare a query for the data we need. First, the year 2023 in current prices:\n\ndat_23 &lt;- get_eurostat(\"nama_10_gdp\", \n                    filters = list(geo = c(\"ES\", \"EA20\", \"EU27_2020\"),\n                                   na_item = \"B1GQ\",\n                                   unit = c(\"CP_MEUR\"),\n                                   time_period = 2023),\n                    time_format = \"num\") |&gt; \n  select(geo, time, values)\n\nAnd after the 2024 in previous year prices\n\ndat_24 &lt;- get_eurostat(\"nama_10_gdp\", \n                    filters = list(geo = c(\"ES\", \"EA20\", \"EU27_2020\"),\n                                   na_item = \"B1GQ\",\n                                   unit = c(\"PYP_MEUR\"),\n                                   time_period = 2024),\n                    time_format = \"num\") |&gt; \n  select(geo, time, values)\n\nWe bind them together and calculate the change between 2024 and 2023:\n\ndat &lt;- bind_rows(dat_23, dat_24) |&gt; \n  pivot_wider(names_from = time,\n              values_from = values) |&gt; \n  mutate(change = `2024` - `2023`,\n         change_p = round(change / `2023` * 100, 2))  \n\nknitr::kable(dat)\n\n\n\n\ngeo\n2023\n2024\nchange\nchange_p\n\n\n\n\nEU27_2020\n17197822\n17372727\n174905.4\n1.02\n\n\nEA20\n14598181\n14722950\n124768.8\n0.85\n\n\nES\n1498324\n1546966\n48642.0\n3.25\n\n\n\n\n\nSpain grew by 3.25 in 2024 and the EU by 1.02. But as we are looking for the contribution, we need to divide the change in Spain with the change in the EU.\n\ncont_es_24_eu &lt;- round(dat |&gt; filter(geo == \"ES\") |&gt; select(change) |&gt; pull() / \n                       dat |&gt; filter(geo == \"EU27_2020\") |&gt; select(change) |&gt; pull()\n                       * 100, 2)\n\ncont_es_24_ea &lt;- round(dat |&gt; filter(geo == \"ES\") |&gt; select(change) |&gt; pull() / \n                       dat |&gt; filter(geo == \"EA20\") |&gt; select(change) |&gt; pull()\n                       * 100, 2)\n\nFor the EU the contribution was 27.81 and for the Euro area 38.99."
+  },
+  {
+    "objectID": "posts/Spain contribution to European GDP growth/index.html#quarterly-data",
+    "href": "posts/Spain contribution to European GDP growth/index.html#quarterly-data",
+    "title": "Spain contribution to European GDP growth",
+    "section": "Quarterly data",
+    "text": "Quarterly data"
   }
 ]
