@@ -7,11 +7,11 @@ execute:
   message: false
 ---
 
-A journalist recently asked us if an statement from a politician was true. The statement was that Spain represented half of the European growth. In this (first) post we would learn how to do it using Eurostat data and a bit of R.
+A journalist recently asked my colleagues if an statement from a politician was true. The statement was that Spain represented half of the European growth. In this (first) post, we would learn how to calculate that metric using Eurostat data and a bit of R.
 
 ## Annual data
 
-First, I will show the more direct way to do it for annual data. If we want to calculate it for 2024 we need to get the data for Spain and the EU (or Euro area) for 2023 in current prices and for 2024 in previous year prices (prices of 2023). By difference we can calculate the volume change in both areas.
+First, I will show the more direct way to do it for annual data. If we want to calculate it for 2024, we need to get the data for Spain and the EU (or Euro area) for 2023 in current prices and for 2024 in previous year prices (prices of 2023). By difference, we can calculate the volume change in both areas.
 
 First we load the libraries.
 
@@ -21,7 +21,7 @@ library(dplyr)
 library(tidyr)
 ```
 
-And we prepare a query for the data we need. First, the year 2023 in current prices:
+And we collect the data we need. First, the year 2023 in current prices:
 
 ```{r}
 dat_23 <- get_eurostat("nama_10_gdp", 
@@ -35,7 +35,7 @@ dat_23 <- get_eurostat("nama_10_gdp",
 knitr::kable(dat_23)
 ```
 
-And after the 2024 in previous year prices
+And after, the year 2024 in previous year prices:
 
 ```{r}
 dat_24 <- get_eurostat("nama_10_gdp", 
@@ -79,9 +79,9 @@ For the EU aggregate the contribution by Spain was `r cont_es_24_eu` and for the
 
 ## Quarterly data
 
-In the case of quarterly data, for example comparing the fourth quarter of 2024 with the fourth quarter of 2023, we cannot compared current prices in 2023Q4, which are at the prices of 2023Q4, with the previous year prices of 2024. The easiest way is to use the 2023Q4 in current prices as a kind of weights for the start of the period and calculate the change between 2024Q4 and 2023Q4 in chain linked series.
+For quarterly data, to compare the fourth quarter of 2024 with the fourth quarter of 2023, we cannot compare current prices in 2023Q4, which are measured at the prices of 2023Q4, with the previous year prices of 2024Q4, which are measured at the prices of 2023. The easiest way is to use the 2023Q4 in current prices as weights for the start of the period and calculate the change between 2024Q4 and 2023Q4 in chain linked series, which provide the volume evolution.
 
-First the current prices.
+First the current prices for 2023Q4:
 
 ```{r}
 dat_23_q4 <- get_eurostat("namq_10_gdp", 
@@ -96,7 +96,7 @@ dat_23_q4 <- get_eurostat("namq_10_gdp",
 knitr::kable(dat_23_q4)
 ```
 
-And then the chain linked data.
+And then the chain linked data for 2024Q4 and 2023Q4.
 
 ```{r}
 dat_24_q4 <- get_eurostat("namq_10_gdp", 
@@ -124,7 +124,7 @@ knitr::kable(dat_24_q4)
 
 Spain grew by `r q_change |> filter(geo == "ES") |> select(change_p) |> pull()` between 2024Q4 and 2023Q4 and the EU  by `r q_change |> filter(geo == "EU27_2020") |> select(change_p) |> pull()`.
 
-We combine both datasets to calculate the contribution
+We combine both datasets to calculate the contribution:
 
 ```{r}
 dat_23_q4$time <- NULL
@@ -149,6 +149,6 @@ cont_es_24q4_ea <- round(contrib_q |> filter(geo == "ES") |> select(contrib) |> 
 
 For the EU the contribution was `r cont_es_24q4_eu` and for the Euro area `r cont_es_24q4_ea`.
 
-It seems after all the statement was **not correct**, although my guess is that probably the politician was adding Portugal and referring to the Euro area. I leave it as an exercise to calculate the contribution of Spain and Portugal.
+It seems that the statement was **not correct**, although my guess is that probably the politician was adding Portugal and referring to the Euro area. I leave it as an exercise to calculate the contribution of Spain and Portugal.
 
 
