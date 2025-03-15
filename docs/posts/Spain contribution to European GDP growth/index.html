@@ -192,7 +192,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">unit =</span> <span class="fu">c</span>(<span class="st">"CP_MEUR"</span>),</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">time_period =</span> <span class="dv">2023</span>),</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">time_format =</span> <span class="st">"num"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(geo, time, values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(geo, time, values)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(dat_23)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">geo</th>
+<th style="text-align: right;">time</th>
+<th style="text-align: right;">values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EU27_2020</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">17197822</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EA20</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">14598181</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ES</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">1498324</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <p>And after the 2024 in previous year prices</p>
 <div class="cell">
@@ -202,7 +232,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">unit =</span> <span class="fu">c</span>(<span class="st">"PYP_MEUR"</span>),</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">time_period =</span> <span class="dv">2024</span>),</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">time_format =</span> <span class="st">"num"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(geo, time, values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(geo, time, values)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(dat_24)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">geo</th>
+<th style="text-align: right;">time</th>
+<th style="text-align: right;">values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EU27_2020</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">17372727</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EA20</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">14722950</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ES</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">1546966</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <p>We bind them together and calculate the change between 2024 and 2023:</p>
 <div class="cell">
@@ -264,6 +324,112 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="quarterly-data" class="level2">
 <h2 class="anchored" data-anchor-id="quarterly-data">Quarterly data</h2>
+<p>In the case of quarterly data, for example comparing the fourth quarter of 2024 with the fourth quarter of 2023, we cannot compared current prices in 2023Q4, which are at the prices of 2023Q4, with the previous year prices of 2024. The easiest way is to use the 2023Q4 in current prices as a kind of weights for the start of the period and calculate the change between 2024Q4 and 2023Q4 in chain linked series.</p>
+<p>First the current prices.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dat_23_q4 <span class="ot">&lt;-</span> <span class="fu">get_eurostat</span>(<span class="st">"namq_10_gdp"</span>, </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">filters =</span> <span class="fu">list</span>(<span class="at">geo =</span> <span class="fu">c</span>(<span class="st">"ES"</span>, <span class="st">"EA20"</span>, <span class="st">"EU27_2020"</span>),</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">na_item =</span> <span class="st">"B1GQ"</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">unit =</span> <span class="fu">c</span>(<span class="st">"CP_MEUR"</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">s_adj =</span> <span class="st">"SCA"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">time_period =</span> <span class="st">"2024-Q4"</span>),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">time_format =</span> <span class="st">"raw"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(geo, time, values)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(dat_23_q4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">geo</th>
+<th style="text-align: left;">time</th>
+<th style="text-align: right;">values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EU27_2020</td>
+<td style="text-align: left;">2024-Q4</td>
+<td style="text-align: right;">4554634</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EA20</td>
+<td style="text-align: left;">2024-Q4</td>
+<td style="text-align: right;">3842814</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ES</td>
+<td style="text-align: left;">2024-Q4</td>
+<td style="text-align: right;">407457</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>And then the chain linked data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dat_24_q4 <span class="ot">&lt;-</span> <span class="fu">get_eurostat</span>(<span class="st">"namq_10_gdp"</span>, </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">filters =</span> <span class="fu">list</span>(<span class="at">geo =</span> <span class="fu">c</span>(<span class="st">"ES"</span>, <span class="st">"EA20"</span>, <span class="st">"EU27_2020"</span>),</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">na_item =</span> <span class="st">"B1GQ"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">unit =</span> <span class="fu">c</span>(<span class="st">"CLV20_MEUR"</span>),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">s_adj =</span> <span class="st">"SCA"</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">time_period =</span> <span class="fu">c</span>(<span class="st">"2023-Q4"</span>,<span class="st">"2024-Q4"</span>)),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">time_format =</span> <span class="st">"raw"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(geo, time, values)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(dat_24_q4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">geo</th>
+<th style="text-align: left;">time</th>
+<th style="text-align: right;">values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EU27_2020</td>
+<td style="text-align: left;">2023-Q4</td>
+<td style="text-align: right;">3758731</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EU27_2020</td>
+<td style="text-align: left;">2024-Q4</td>
+<td style="text-align: right;">3810585</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EA20</td>
+<td style="text-align: left;">2023-Q4</td>
+<td style="text-align: right;">3213335</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EA20</td>
+<td style="text-align: left;">2024-Q4</td>
+<td style="text-align: right;">3250471</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ES</td>
+<td style="text-align: left;">2023-Q4</td>
+<td style="text-align: right;">331427</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ES</td>
+<td style="text-align: left;">2024-Q4</td>
+<td style="text-align: right;">342982</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>We compute the change between 2024Q4 and 2023Q4.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>q_change <span class="ot">&lt;-</span> dat_24_q4 <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> time,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_from =</span> values) <span class="sc">|&gt;</span> </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">change_p =</span> <span class="fu">round</span>(<span class="st">`</span><span class="at">2024-Q4</span><span class="st">`</span> <span class="sc">/</span> <span class="st">`</span><span class="at">2023-Q4</span><span class="st">`</span> <span class="sc">*</span> <span class="dv">100-100</span>, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Spain grew by 3.486 between 2024Q4 and 2023Q4 and the EU by 1.38.</p>
 
 
 </section>

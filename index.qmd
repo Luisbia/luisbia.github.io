@@ -1,5 +1,5 @@
 ---
-title: "Personal blog of Luis Biedma"
+title: "Personal blog of Luis Biedma on National Accounts topics"
 listing:
   contents: posts
   sort: "date desc"
