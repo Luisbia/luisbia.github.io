@@ -144,6 +144,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
                                 <div class="quarto-categories">
                 <div class="quarto-category">GDP</div>
                 <div class="quarto-category">Eurostat</div>
+                <div class="quarto-category">R</div>
               </div>
                   </div>
   </div>
@@ -174,7 +175,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>A journalist recently asked us if an statement from a politician was true. The statement was that Spain represented half of the European growth. In this (first) post we would learn how to do it using Eurostat data.</p>
+<p>A journalist recently asked us if an statement from a politician was true. The statement was that Spain represented half of the European growth. In this (first) post we would learn how to do it using Eurostat data and a bit of R.</p>
 <section id="annual-data" class="level2">
 <h2 class="anchored" data-anchor-id="annual-data">Annual data</h2>
 <p>First, I will show the more direct way to do it for annual data. If we want to calculate it for 2024 we need to get the data for Spain and the EU (or Euro area) for 2023 in current prices and for 2024 in previous year prices (prices of 2023). By difference we can calculate the volume change in both areas.</p>
@@ -320,7 +321,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                       dat <span class="sc">|&gt;</span> <span class="fu">filter</span>(geo <span class="sc">==</span> <span class="st">"EA20"</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(change) <span class="sc">|&gt;</span> <span class="fu">pull</span>()</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                       <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>For the EU the contribution was 27.81 and for the Euro area 38.99.</p>
+<p>For the EU aggregate the contribution by Spain was 27.81 and for the Euro area 38.99.</p>
 </section>
 <section id="quarterly-data" class="level2">
 <h2 class="anchored" data-anchor-id="quarterly-data">Quarterly data</h2>
@@ -427,9 +428,108 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>q_change <span class="ot">&lt;-</span> dat_24_q4 <span class="sc">|&gt;</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> time,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">values_from =</span> values) <span class="sc">|&gt;</span> </span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">change_p =</span> <span class="fu">round</span>(<span class="st">`</span><span class="at">2024-Q4</span><span class="st">`</span> <span class="sc">/</span> <span class="st">`</span><span class="at">2023-Q4</span><span class="st">`</span> <span class="sc">*</span> <span class="dv">100-100</span>, <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">change_p =</span> <span class="fu">round</span>(<span class="st">`</span><span class="at">2024-Q4</span><span class="st">`</span> <span class="sc">/</span> <span class="st">`</span><span class="at">2023-Q4</span><span class="st">`</span> <span class="sc">*</span> <span class="dv">100-100</span>, <span class="dv">3</span>))</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(dat_24_q4)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">geo</th>
+<th style="text-align: left;">time</th>
+<th style="text-align: right;">values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EU27_2020</td>
+<td style="text-align: left;">2023-Q4</td>
+<td style="text-align: right;">3758731</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EU27_2020</td>
+<td style="text-align: left;">2024-Q4</td>
+<td style="text-align: right;">3810585</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EA20</td>
+<td style="text-align: left;">2023-Q4</td>
+<td style="text-align: right;">3213335</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EA20</td>
+<td style="text-align: left;">2024-Q4</td>
+<td style="text-align: right;">3250471</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ES</td>
+<td style="text-align: left;">2023-Q4</td>
+<td style="text-align: right;">331427</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ES</td>
+<td style="text-align: left;">2024-Q4</td>
+<td style="text-align: right;">342982</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <p>Spain grew by 3.486 between 2024Q4 and 2023Q4 and the EU by 1.38.</p>
+<p>We combine both datasets to calculate the contribution</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>dat_23_q4<span class="sc">$</span>time <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>q_change <span class="ot">&lt;-</span> q_change <span class="sc">|&gt;</span> </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(geo,change_p) </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>contrib_q <span class="ot">&lt;-</span> <span class="fu">full_join</span>(dat_23_q4, q_change) <span class="sc">|&gt;</span> </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">contrib =</span> values <span class="sc">*</span> change_p)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(contrib_q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">geo</th>
+<th style="text-align: right;">values</th>
+<th style="text-align: right;">change_p</th>
+<th style="text-align: right;">contrib</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EU27_2020</td>
+<td style="text-align: right;">4554634</td>
+<td style="text-align: right;">1.380</td>
+<td style="text-align: right;">6285395</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EA20</td>
+<td style="text-align: right;">3842814</td>
+<td style="text-align: right;">1.156</td>
+<td style="text-align: right;">4442293</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ES</td>
+<td style="text-align: right;">407457</td>
+<td style="text-align: right;">3.486</td>
+<td style="text-align: right;">1420395</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cont_es_24q4_eu <span class="ot">&lt;-</span> <span class="fu">round</span>(contrib_q <span class="sc">|&gt;</span> <span class="fu">filter</span>(geo <span class="sc">==</span> <span class="st">"ES"</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(contrib) <span class="sc">|&gt;</span> <span class="fu">pull</span>() <span class="sc">/</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                       contrib_q <span class="sc">|&gt;</span> <span class="fu">filter</span>(geo <span class="sc">==</span> <span class="st">"EU27_2020"</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(contrib) <span class="sc">|&gt;</span> <span class="fu">pull</span>()</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>                       <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">2</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>cont_es_24q4_ea <span class="ot">&lt;-</span> <span class="fu">round</span>(contrib_q <span class="sc">|&gt;</span> <span class="fu">filter</span>(geo <span class="sc">==</span> <span class="st">"ES"</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(contrib) <span class="sc">|&gt;</span> <span class="fu">pull</span>() <span class="sc">/</span> </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                       contrib_q <span class="sc">|&gt;</span> <span class="fu">filter</span>(geo <span class="sc">==</span> <span class="st">"EA20"</span>) <span class="sc">|&gt;</span> <span class="fu">select</span>(contrib) <span class="sc">|&gt;</span> <span class="fu">pull</span>()</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                       <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For the EU the contribution was 22.6 and for the Euro area 31.97.</p>
+<p>It seems after all the statement was <strong>not correct</strong>, although my guess is that probably that the politician was adding Portugal and referring to the Euro area. I leave it as an exercise to calculate the contribution of Spain and Portugal.</p>
 
 
 </section>
