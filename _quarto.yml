@@ -5,16 +5,16 @@ project:
 website:
   title: "blog"
   navbar:
-    left:
-      - text: Home
-        file: index.qmd
     right:
+      - about.qmd
+      - icon: github
+        href: https://github.com/
       - icon: twitter
-        href: https://twitter.com/luisbia
+        href: https://twitter.com
 format:
   html:
     theme: cosmo
     css: styles.css
 
-editor: source
+editor: visual
 
