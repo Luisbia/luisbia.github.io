@@ -1,0 +1,44 @@
+---
+title: "Expenditure on defence"
+date: "2025-03-15"
+categories: [GDP, Eurostat,R]
+execute:
+  warning: false
+  message: false
+  eval: false
+---
+
+https://ec.europa.eu/eurostat/web/products-manuals-and-guidelines/w/ks-gq-23-002
+
+```{r}
+library(eurostat)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+```
+
+```{r}
+dat <- get_eurostat("gov_10a_exp", 
+                    filters = list(geo = c("ES","EU27_2020"),
+                                   sector = "S13",
+                                   unit = c("MIO_EUR", "PC_GDP"),
+                                   cofog99 = c("GF02", "GF0201", "GF0202", "GF0203", "GF0204", "GF0205")),
+                    time_format = "num") |> 
+  na.omit()
+
+labels_cofog <- get_eurostat_dic("cofog99") |> 
+  select(cofog99 = code_name, cofog99_label = full_name)
+
+labels_na_item <- get_eurostat_dic("na_item") |> 
+  select(na_item = code_name, na_item_label = full_name)
+
+dat <- left_join(dat, labels_cofog) %>%
+  left_join(.,labels_na_item)
+
+```
+
+```{r}
+dat |> filter(cofog99 == "GF02" & na_item == "TE" & unit == "PC_GDP") |> 
+  ggplot(aes(x = time, y = values, colour = geo)) +
+  geom_line()
+```

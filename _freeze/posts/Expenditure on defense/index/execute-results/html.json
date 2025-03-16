@@ -1,0 +1,17 @@
+{
+  "hash": "686893a0bc32ee72bc397ffa564ccef4",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Expenditure on defence\"\ndate: \"2025-03-15\"\ncategories: [GDP, Eurostat,R]\nexecute:\n  warning: false\n  message: false\n---\n\n\nhttps://ec.europa.eu/eurostat/web/products-manuals-and-guidelines/w/ks-gq-23-002\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(eurostat)\nlibrary(dplyr)\nlibrary(tidyr)\nlibrary(ggplot2)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\ndat <- get_eurostat(\"gov_10a_exp\", \n                    filters = list(geo = c(\"ES\",\"EU27_2020\"),\n                                   sector = \"S13\",\n                                   unit = c(\"MIO_EUR\", \"PC_GDP\"),\n                                   cofog99 = c(\"GF02\", \"GF0201\", \"GF0202\", \"GF0203\", \"GF0204\", \"GF0205\")),\n                    time_format = \"num\") |> \n  na.omit()\n\nlabels_cofog <- get_eurostat_dic(\"cofog99\") |> \n  select(cofog99 = code_name, cofog99_label = full_name)\n\nlabels_na_item <- get_eurostat_dic(\"na_item\") |> \n  select(na_item = code_name, na_item_label = full_name)\n\ndat <- left_join(dat, labels_cofog) %>%\n  left_join(.,labels_na_item)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\ndat |> filter(cofog99 == \"GF02\" & na_item == \"TE\" & unit == \"PC_GDP\") |> \n  ggplot(aes(x = time, y = values, colour = geo)) +\n  geom_line()\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-3-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

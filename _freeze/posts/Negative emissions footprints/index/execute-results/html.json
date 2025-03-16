@@ -1,0 +1,15 @@
+{
+  "hash": "d89b8ef66e6c3f90587f3ebf467c93dc",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Negative emissions footprints\"\ndate: \"2025-03-15\"\ncategories: [GDP, Eurostat,R]\nexecute:\n  warning: false\n  message: false\n  eval: false\n---\n\n\nhttps://ec.europa.eu/eurostat/web/products-manuals-and-guidelines/w/ks-gq-23-002\n\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(eurostat)\nlibrary(dplyr)\nlibrary(tidyr)\nlibrary(ggplot2)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\ndat <- get_eurostat(\"env_ac_ghgfp\", \n                    filters = list(time_period = 2020),\n                    time_format = \"num\") |> \n  na.omit()\n\nlabels_cofog <- get_eurostat_dic(\"cofog99\") |> \n  select(cofog99 = code_name, cofog99_label = full_name)\n\nlabels_na_item <- get_eurostat_dic(\"na_item\") |> \n  select(na_item = code_name, na_item_label = full_name)\n\ndat <- left_join(dat, labels_cofog) %>%\n  left_join(.,labels_na_item)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\ndat |> filter(cofog99 == \"GF02\" & na_item == \"TE\" & unit == \"PC_GDP\") |> \n  ggplot(aes(x = time, y = values, colour = geo)) +\n  geom_line()\n```\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
