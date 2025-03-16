@@ -9,14 +9,18 @@ execute:
 
 I collect for reference some of the readings I found interesting/useful this week.
 
-- data.table vs dplyr: A Side-by-Side Comparison <https://albert-rapp.de/posts/34_datatable_vs_dplyr/34_datatable_vs_dplyr.html>
+-   data.table vs dplyr: A Side-by-Side Comparison <https://albert-rapp.de/posts/34_datatable_vs_dplyr/34_datatable_vs_dplyr.html>
 
 As I need to use (read/write) data.table quite often but I am still more familiar with dplyr, all references are useful.
 
-- ¿Por qué el Gasto Público forma parte del PIB? <https://nadaesgratis.es/antonia-diaz/por-que-el-gasto-publico-forma-parte-del-pib>
+-   ¿Por qué el Gasto Público forma parte del PIB? <https://nadaesgratis.es/antonia-diaz/por-que-el-gasto-publico-forma-parte-del-pib>
 
-No estoy muy de acuerdo en que sea correcto añadir los automóviles de los particulares al stock de capital y calcular una depreciación para ellos. 
+No estoy muy de acuerdo en que sea correcto añadir los automóviles de los particulares al stock de capital y calcular una depreciación para ellos.
 
-- Build a Personal Website with Quarto & Github Pages | Lesson 4, Websites and Dashboards with R <https://www.youtube.com/watch?v=OlvO-EG-P60>
+-   Build a Personal Website with Quarto & Github Pages \| Lesson 4, Websites and Dashboards with R <https://www.youtube.com/watch?v=OlvO-EG-P60>
 
-Nice youtube tutorial that helped me a lot to build this site on github pages. There are also other useful tutorials for quarto dashboards and basic understanding of using git.  
+Nice youtube tutorial that helped me a lot to build this site on github pages. There are also other useful tutorials for quarto dashboards and basic understanding of using git.
+
+- A Country Is Not a Company by Paul Krugman <https://hbr.org/1996/01/a-country-is-not-a-company>
+
+A classic article that I probably read a long time ago but that I find quite insighful.
