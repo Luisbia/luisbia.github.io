@@ -1,0 +1,154 @@
+---
+title: "Renta regional de los hogares"
+date: "2025-06-01"
+categories: [Regional Accounts, Eurostat,R]
+execute:
+  warning: false
+  message: false
+---
+
+El confidencial ha publicado un artículo (<https://www.elconfidencial.com/economia/2025-05-31/solo-quedan-dos-ccaa-ingresos-hogares-media-ue_4141354/>) que ha tenido cierta repercusión en algunos twitteros "económicos" que sigo. El artículo se basa en una publicación de Eurostat (<https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Regional_household_income_statistics>) que es básicamente la publicación que preparé hace cuatro años. Me llevó bastante tiempo prepararlo porque quería evitar el típico anodino artículo (X creció Y% en al año Z) y el código con el que preparé el mock-up todavía está disponible (<https://github.com/eurostat/statistics-coded/blob/master/economy/regional_household_income/statistics_coded_regional_HHI.Rmd>).
+
+Estos días he estado leyendo el libro **"La factura del cupo catalán. Privilegios territoriales frente a ciudadanía" (La Esfera de los Libros, 2025)** de JFV y Francisco de la Torre (muy recomendable!).
+
+Puse un cuadro explicativo de por qué no es buena idea comparar la renta disponible (código B6N) de regiones de diferentes países después de algunas discusiones con usuarios holandeses que se escandalizaban de que algunas regiones italianas estuvieran por encima de las holandeses. Habría que usar la renta disponible ajustada (B7N) pero no está disponible (sólo para España).
+
+Sobre todo recuerdo lo que me costó explicar el mapa M3. En el se calcula la renta primaria (B5N) y la renta disponibles per capita de los hogares (B6N) y se pone en relación a la media nacional (indice 100). Luego se calcula el ratio entre B6N y B5N. Si el ratio es mayor que 100 indica que la región mejora (relativamente) y si es menor que empeora(relativamente). Se espera, y se cumple, que en general las que están por encima de la media para B5G empeoran y viceversa.
+
+Para comparar actualizo el cálculo para los países federales (Alemania, Austria, Bélgica y España).
+
+```{r}
+pacman::p_load(dplyr,tidyr,stringr,eurostat, ggplot2, luispack,ggtext)
+
+hh2 <- get_eurostat("nama_10r_2hhinc", time_format = "num")
+pop3 <- get_eurostat("nama_10r_3popgdp", time_format = "num")
+
+temp <- hh2 %>%
+  unite(na_item, c(na_item, direct)) %>%
+  filter(unit == "MIO_NAC"& na_item %in% c("B5N_BAL", "B6N_BAL")) %>%
+  pivot_wider(
+    names_from = na_item,
+    values_from = values
+  ) %>%
+  mutate(
+    country = str_sub(geo, 1, 2),
+    NUTS = str_length(geo) - 2
+  ) %>%
+  filter(NUTS %in% c("0", "2") & country %in% c("AT","BE", "DE", "ES")) %>%
+  select(geo, country, NUTS, TIME_PERIOD, B5N_BAL, B6N_BAL) %>%
+  pivot_longer(
+    cols = c("B5N_BAL", "B6N_BAL"),
+    names_to = "na_item",
+    values_to = "values"
+  )
+
+pop <- pop3 %>%
+  select(-unit) %>%
+  rename(pop = values)
+
+temp <- left_join(temp, pop) %>%
+  mutate(percapita = values * 1000 / pop) %>%
+  droplevels() %>%
+  group_by(country, na_item, TIME_PERIOD) %>%
+  mutate(nat_percapita = percapita * 100 / percapita[NUTS == "0"]) %>%
+  filter(NUTS == "2") %>%
+  select(geo, na_item, TIME_PERIOD,nat_percapita) %>%
+  pivot_wider(
+    names_from = na_item,
+    values_from = nat_percapita
+  ) %>%
+  mutate(ratio = round(B6N_BAL * 100 / B5N_BAL, 1)) |> 
+  na.omit()
+```
+Lo he hecho para todos los años disponibles, 2000-2023 para Austria y Bélgica y 2000-2022 para Alemania y España. Para tener una visión global los pongo en un gráfico. Primero veamos la dispersión de los índices per capita respecto a la medio nacional.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+ggplot(temp)+
+  geom_point(aes(TIME_PERIOD,B5N_BAL),colour = "#2644A7", alpha = 0.7)+
+  geom_point(aes(TIME_PERIOD,B6N_BAL),colour = "#AF155C", alpha = 0.7)+
+  facet_wrap(vars(country))+
+  theme_luis()+
+   labs(title = "<span style = 'font-size:14pt;color:#2644A7;'>B5N </span><span style = 'font-size:14pt;color:#AF155C;'>B6N</span>",
+        subtitle = "100 = Media nacional"
+  ) +
+  theme(
+    plot.title = element_markdown(size = 11, lineheight = 1.2)
+  )
+```
+
+Vemos que en Austria las diferencias en B5N son bastante pequeñas aunque habría que mirar los detalles. Los valores más bajos para España son Ceuta y Melilla que no son muy significativas.
+
+Ahora mirando el ratio, vemos que en España hay sólo tres regiones que empeoran (Madrid, Baleares y Cataluña). Navarra está en el 99.9 ppero lo he redondeado a 100. El tamaño del ajuste para Madrid es similar al de Oberbayern o Hamburgo o el Bravante Flamenco..perdiendo unos 10 puntos.
+
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+ggplot(temp)+
+  geom_point(aes(TIME_PERIOD,ratio),colour = "#E04040")+
+  geom_hline(yintercept = 100, colour = "grey10")+
+  facet_wrap(vars(country))+
+  theme_luis()+
+  labs(title = "Ratio B5N/B6N")
+
+```
+Acabo calculando el mismo indicador para la Renta Disponible Ajustada (B7N), que es B6N más D63, que son transferencias sociales en especie que básicamente provee el gobierno (nacional o regional). Básicamente sanidad, educación, vivienda, defensa... Este gráfico confirma claramente la tesis del libro de que la situación del País Vasco es una anomalía.
+
+```{r}
+#| fig-width: 12
+#| fig-height: 8
+temp <- hh2 %>%
+  unite(na_item, c(na_item, direct)) %>%
+  filter(unit == "MIO_NAC"& na_item %in% c("B5N_BAL", "B6N_BAL", "B7N_BAL")) %>%
+  pivot_wider(
+    names_from = na_item,
+    values_from = values
+  ) %>%
+  mutate(
+    country = str_sub(geo, 1, 2),
+    NUTS = str_length(geo) - 2
+  ) %>%
+  filter(NUTS %in% c("0", "2") & country %in% c( "ES")) %>%
+  select(geo, country, NUTS, TIME_PERIOD, B5N_BAL, B6N_BAL, B7N_BAL) %>%
+  pivot_longer(
+    cols = c("B5N_BAL", "B6N_BAL", "B7N_BAL"),
+    names_to = "na_item",
+    values_to = "values"
+  )
+
+
+temp <- left_join(temp, pop) %>%
+  mutate(percapita = values * 1000 / pop) %>%
+  droplevels() %>%
+  group_by(country, na_item, TIME_PERIOD) %>%
+  mutate(nat_percapita = percapita * 100 / percapita[NUTS == "0"]) %>%
+  filter(NUTS == "2") %>%
+  select(geo, na_item, TIME_PERIOD,nat_percapita) %>%
+  pivot_wider(
+    names_from = na_item,
+    values_from = nat_percapita
+  ) %>%
+  mutate(ratio_B6_B5 = round(B6N_BAL * 100 / B5N_BAL, 1),
+         ratio_B7_B5 = round(B7N_BAL * 100 / B5N_BAL, 1)) |> 
+  na.omit() |> 
+  filter(geo %in% c("ES21", "ES22", "ES30", "ES51", "ES53")) |> 
+  select(geo,TIME_PERIOD,ratio_B6_B5, ratio_B7_B5) |> 
+  pivot_longer(cols = c(ratio_B6_B5, ratio_B7_B5),
+               names_to = "ratio",
+               values_to = "values") |> 
+  mutate(label = case_when(geo == "ES21" ~ "País Vasco",
+                           geo == "ES22" ~ "Comunidad Foral de Navarra",
+                           geo == "ES30" ~ "Comunidad de Madrid",
+                           geo == "ES51" ~ "Cataluña",
+                           geo == "ES53" ~ "Illes Balears"))
+
+ggplot(temp,aes(TIME_PERIOD, values,colour = ratio))+
+  geom_line(linewidth = 0.75)+
+  facet_wrap(~label)+
+  theme_luis()+
+  scale_colour_luis()+
+  theme(legend.position = "top", legend.justification = "right")
+```
+
